@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "DailyVibe",
+    "slug": "dailyvibe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dailyvibe.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.dailyvibe.app",
+      "versionCode": 1
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
+
