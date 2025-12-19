@@ -59,3 +59,9 @@ web-build/
 .env
 .env.local
 
+# EAS
+.easignore
+
+# Scripts (keep the directory structure)
+!scripts/.gitkeep
+

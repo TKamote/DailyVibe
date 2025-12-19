@@ -10,18 +10,20 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dailyvibe.app",
-      "buildNumber": "1"
+      "bundleIdentifier": "com.davidonquit.dailyvibe",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.dailyvibe.app",
+      "package": "com.davidonquit.dailyvibe",
       "versionCode": 1
     },
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "0df0107c-c4cc-4540-9785-bfda8d165b70"
       }
     }
   }
 }
-

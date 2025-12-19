@@ -6,7 +6,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "pre-build": "./scripts/pre-build-check.sh",
+    "build:ios": "npm run pre-build && npx eas build --profile production --platform ios",
+    "build:android": "npm run pre-build && npx eas build --profile production --platform android",
+    "build:all": "npm run pre-build && npx eas build --profile production --platform all"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
