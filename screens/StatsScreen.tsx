@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useHabits } from '../hooks/useHabits';
 import { useTheme } from '../lib/theme';
 import { getLastNDays } from '../lib/utils';
@@ -10,7 +10,16 @@ interface StatsScreenProps {
 
 export const StatsScreen: React.FC<StatsScreenProps> = ({ navigation }) => {
   const { habits } = useHabits();
-  const { theme } = useTheme();
+  const { theme, setThemeMode } = useTheme();
+
+  const handleThemeToggle = () => {
+    // Toggle between light and dark only
+    if (theme.mode === 'light') {
+      setThemeMode('dark');
+    } else {
+      setThemeMode('light');
+    }
+  };
 
   const stats = useMemo(() => {
     const last30Days = getLastNDays(30);
@@ -86,13 +95,33 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({ navigation }) => {
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Statistics</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Your habit tracking insights</Text>
+        <View style={styles.headerTop}>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerLogoWrapper}>
+              <Image
+                source={require('../assets/icon.png')}
+                style={styles.headerLogo}
+                resizeMode="cover"
+              />
+            </View>
+            <Text style={[styles.title, { color: theme.colors.primary }]}>DailyVibe</Text>
+          </View>
+          <TouchableOpacity onPress={handleThemeToggle} activeOpacity={0.7}>
+            <Text style={[styles.headerIcon, { color: theme.colors.text }]}>
+              {theme.mode === 'light' ? '🌓' : '🌙'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.content}>
+          <Text style={[styles.pageTitle, { color: theme.colors.text }]}>Statistics</Text>
+          <Text style={[styles.introText, { color: theme.colors.textSecondary }]}>
+            Your habit tracking insights
+          </Text>
         <View style={styles.statsGrid}>
           <StatCard
             title="Total Habits"
@@ -151,8 +180,9 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({ navigation }) => {
             </Text>
           </View>
         )}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -162,20 +192,54 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 24,
+    paddingBottom: 16,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerLogoWrapper: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+    borderRadius: 20, // 50% of width/height
+    overflow: 'hidden',
+  },
+  headerLogo: {
+    width: 40,
+    height: 40,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
+  headerIcon: {
+    fontSize: 24,
+    padding: 4,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   content: {
     padding: 16,
+  },
+  introText: {
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',

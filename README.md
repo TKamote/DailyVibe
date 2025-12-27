@@ -13,11 +13,12 @@ Create the simplest, most intelligent habit tracker that helps people build bett
 - [x] Planning & Strategy
 - [x] Project Setup
 - [x] MVP Development (Phase 1 Complete!)
+- [x] Firebase Authentication
+- [x] Firestore Multi-Device Sync
+- [x] iOS & Android Builds
 - [ ] Reminders & Notifications
 - [ ] AI Integration (Phase 2)
 - [ ] Social Features (Phase 3)
-- [x] iOS Build Complete
-- [ ] App Store Submission
 
 ## 🚀 Quick Start
 
@@ -45,62 +46,75 @@ DailyVibe/
 │   ├── StreakDisplay.tsx
 │   └── CalendarView.tsx
 ├── screens/                # App screens
+│   ├── LoginScreen.tsx
 │   ├── HomeScreen.tsx
 │   ├── AddHabitScreen.tsx
 │   ├── EditHabitScreen.tsx
 │   ├── StatsScreen.tsx
-│   └── SettingsScreen.tsx
+│   ├── GuideScreen.tsx
+│   ├── SettingsScreen.tsx
+│   ├── PrivacyPolicyScreen.tsx
+│   └── SplashScreen.tsx
 ├── hooks/                  # Custom React hooks
-│   └── useHabits.ts
+│   ├── useHabits.ts
+│   └── useAuth.ts
 ├── lib/                    # Utilities & services
-│   ├── storage.ts
+│   ├── firebase.ts         # Firebase configuration
+│   ├── firestore.ts        # Firestore operations
+│   ├── storage.ts          # Local storage (migration)
 │   ├── utils.ts
-│   └── theme.tsx
+│   ├── theme.tsx
+│   └── privacyPolicy.ts
 ├── types/                  # TypeScript types
-└── scripts/                # Build scripts
-    └── pre-build-check.sh
+└── docs/                   # Documentation
+    ├── SETUP.md
+    ├── PRIVACY_POLICY.md
+    └── RESEARCH.md
 ```
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Expo/React Native (SDK 51)
+- **Frontend**: Expo/React Native (SDK 53)
 - **Navigation**: React Navigation v6
-- **Storage**: AsyncStorage (local-first)
+- **Backend**: Firebase (Auth, Firestore)
+- **Storage**: Firestore (cloud sync) + AsyncStorage (local cache)
 - **Styling**: React Native StyleSheet
 - **State Management**: React Hooks
 - **Build**: EAS Build
-- **Future**: Firebase, Google Gemini API, RevenueCat
+- **Future**: Google Gemini API, RevenueCat
 
-## ✨ Features (MVP)
+## ✨ Features (Current)
 
+- ✅ User Authentication (Email/Password)
 - ✅ Add, Edit, Delete habits
 - ✅ Daily habit check-off
 - ✅ Streak tracking (current & longest)
 - ✅ Calendar view (30-day history)
 - ✅ Statistics & analytics
-- ✅ Dark/Light mode
+- ✅ Dark/Light mode (default: dark)
 - ✅ Swipe-to-delete gestures
-- ✅ Local data persistence
+- ✅ Multi-device sync (Firestore)
+- ✅ Offline support
+- ✅ Placeholder habit for new users
+- ✅ User guide & privacy policy
 
 ## 📖 Documentation
 
-- [HABIT_TRACKER_PLAN.md](./HABIT_TRACKER_PLAN.md) - Complete implementation plan
-- [HABIT_TRACKER_RESEARCH.md](./HABIT_TRACKER_RESEARCH.md) - Feature research & AI opportunities
+- [Setup Guide](./docs/SETUP.md) - Firebase Authentication & Firestore setup
+- [Privacy Policy](./docs/PRIVACY_POLICY.md) - Privacy policy and data handling
+- [Feature Research](./docs/RESEARCH.md) - Feature research & AI opportunities
 
 ## 🏗️ Building
 
 ```bash
-# Pre-build validation
-npm run pre-build
+# Start development server
+npx expo start --dev-client
 
-# Build for iOS
-npm run build:ios
+# Build for iOS (production)
+npx eas build --profile production --platform ios
 
-# Build for Android
-npm run build:android
-
-# Build for both
-npm run build:all
+# Build for Android (production)
+npx eas build --profile production --platform android
 ```
 
 ---

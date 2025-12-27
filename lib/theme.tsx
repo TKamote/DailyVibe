@@ -18,12 +18,12 @@ interface Theme {
 }
 
 const lightTheme: Theme['colors'] = {
-  background: '#F9FAFB',
+  background: '#FEFDFB', // Warm off-white instead of cold gray
   surface: '#FFFFFF',
-  text: '#1F2937',
-  textSecondary: '#6B7280',
-  border: '#E5E7EB',
-  primary: '#3B82F6',
+  text: '#0F172A', // Deeper, richer dark blue-gray instead of dull gray
+  textSecondary: '#475569', // Warmer slate blue instead of dull gray
+  border: '#E2E8F0', // Softer, warmer border
+  primary: '#2563EB', // Slightly deeper, more vibrant blue
   error: '#EF4444',
 };
 
@@ -48,8 +48,7 @@ const THEME_STORAGE_KEY = '@dailyvibe:theme';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const systemColorScheme = useColorScheme();
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('auto');
-  const [isLoading, setIsLoading] = useState(true);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark'); // Default to dark
 
   useEffect(() => {
     loadThemeMode();
@@ -61,10 +60,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (savedMode && (savedMode === 'light' || savedMode === 'dark' || savedMode === 'auto')) {
         setThemeModeState(savedMode as ThemeMode);
       }
+      // If no saved mode, it will use the default 'dark' from useState
     } catch (error) {
       console.error('Error loading theme:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -92,10 +90,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     colors,
   };
 
-  if (isLoading) {
-    return null; // Or a loading spinner
-  }
-
+  // Always render children, even while loading (use default theme)
   return (
     <ThemeContext.Provider value={{ theme, setThemeMode }}>
       {children}

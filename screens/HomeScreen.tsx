@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useHabits } from '../hooks/useHabits';
 import { useTheme } from '../lib/theme';
@@ -12,7 +12,7 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { habits, loading, toggleHabitCompletion, deleteHabit, refreshHabits } = useHabits();
-  const { theme } = useTheme();
+  const { theme, setThemeMode } = useTheme();
 
   // Reload habits when screen comes into focus
   useFocusEffect(
@@ -33,31 +33,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate('AddHabit');
   };
 
-  const handleSettings = () => {
-    navigation.navigate('Settings');
-  };
-
-  const handleStats = () => {
-    navigation.navigate('Stats');
+  const handleThemeToggle = () => {
+    // Toggle between light and dark only
+    if (theme.mode === 'light') {
+      setThemeMode('dark');
+    } else {
+      setThemeMode('light');
+    }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
         <View style={styles.headerTop}>
-          <View>
-            <Text style={[styles.title, { color: theme.colors.text }]}>DailyVibe</Text>
-            <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Build better habits, one day at a time</Text>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerLogoWrapper}>
+              <Image
+                source={require('../assets/icon.png')}
+                style={styles.headerLogo}
+                resizeMode="cover"
+              />
+            </View>
+            <Text style={[styles.title, { color: theme.colors.primary }]}>DailyVibe</Text>
           </View>
-          <View style={styles.headerActions}>
-            <TouchableOpacity onPress={handleStats} activeOpacity={0.7}>
-              <Text style={[styles.headerIcon, { color: theme.colors.text }]}>📊</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleSettings} activeOpacity={0.7}>
-              <Text style={[styles.headerIcon, { color: theme.colors.text }]}>⚙️</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={handleThemeToggle} activeOpacity={0.7}>
+            <Text style={[styles.headerIcon, { color: theme.colors.text }]}>
+              {theme.mode === 'light' ? '🌓' : '🌙'}
+            </Text>
+          </TouchableOpacity>
         </View>
+      </View>
+
+      <View style={styles.contentHeader}>
+        <Text style={[styles.introText, { color: theme.colors.textSecondary }]}>
+          Build better habits, one day at a time
+        </Text>
       </View>
 
       {habits.length === 0 ? (
@@ -90,7 +100,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       )}
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={handleAddHabit}
         activeOpacity={0.8}
       >
@@ -111,30 +121,47 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 24,
+    paddingBottom: 20,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerLogoWrapper: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+    borderRadius: 20, // 50% of width/height
+    overflow: 'hidden',
+  },
+  headerLogo: {
+    width: 40,
+    height: 40,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
   },
   headerIcon: {
     fontSize: 24,
     padding: 4,
+  },
+  contentHeader: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  introText: {
+    fontSize: 16,
+    lineHeight: 22,
   },
   listContent: {
     paddingVertical: 8,
@@ -161,7 +188,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#3B82F6',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
