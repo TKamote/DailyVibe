@@ -27,11 +27,7 @@
     },
     "android": {
       "package": "com.davidonquit.dailyvibe",
-<<<<<<< HEAD
-      "versionCode": 8,
-=======
       "versionCode": 9,
->>>>>>> d9805ed (center the + habit and increment the production build)
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
