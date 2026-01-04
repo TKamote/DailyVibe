@@ -29,7 +29,7 @@ export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({ naviga
         contentContainerStyle={styles.content}
       >
         <Text style={[styles.lastUpdated, { color: theme.colors.textSecondary }]}>
-          Last Updated: December 25, 2024
+          Last Updated: January 4, 2026
         </Text>
 
       {PRIVACY_POLICY_CONTENT.map((section, index) => (

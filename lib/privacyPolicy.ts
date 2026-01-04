@@ -7,7 +7,7 @@ export const PRIVACY_POLICY_CONTENT = [
   {
     title: 'Information We Collect',
     content:
-      'DailyVibe collects the following information:\n\n• Account Information: When you create an account, we collect your email address for authentication purposes.\n• Habit Data: We store your habit names, completion records, streaks, and statistics to provide the core functionality of the app.\n• App Preferences: We store your theme preferences (light/dark mode) locally on your device.',
+      'DailyVibe collects the following information:\n\n• Account Information: When you create an account, we collect your email address for authentication purposes. Email verification is required to activate your account and ensure account security.\n• Habit Data: We store your habit names, completion records, streaks, and statistics to provide the core functionality of the app.\n• App Preferences: We store your theme preferences (light/dark mode) locally on your device.',
   },
   {
     title: 'How We Use Your Information',
@@ -27,7 +27,7 @@ export const PRIVACY_POLICY_CONTENT = [
   {
     title: 'Data Security',
     content:
-      'We take data security seriously:\n\n• All data is encrypted in transit using HTTPS/TLS\n• All data stored in Firebase is encrypted at rest\n• Authentication is handled securely through Firebase Authentication\n• You can sign out at any time to prevent access to your account\n\nHowever, no method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.',
+      'We take data security seriously:\n\n• All data is encrypted in transit using HTTPS/TLS\n• All data stored in Firebase is encrypted at rest\n• Authentication is handled securely through Firebase Authentication\n• Email verification is required to activate accounts and prevent unauthorized access\n• Password reset functionality is available if you forget your password\n• You can sign out at any time to prevent access to your account\n\nHowever, no method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.',
   },
   {
     title: 'Your Rights and Control',

@@ -22,7 +22,8 @@
       "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "keywords": "habit,tracker,streak,productivity,goals,routine,consistency,wellness,mindfulness"
     },
     "android": {
       "package": "com.davidonquit.dailyvibe",
