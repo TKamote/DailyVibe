@@ -187,7 +187,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    right: 24,
+    left: '50%',
+    marginLeft: -28, // Half of width (56/2) to center it
     bottom: 24,
     width: 56,
     height: 56,
