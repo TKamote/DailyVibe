@@ -11,8 +11,12 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const { habits, loading, toggleHabitCompletion, deleteHabit, refreshHabits } = useHabits();
+  const { habits, loading, toggleHabitCompletion, deleteHabit, refreshHabits, currentDate } = useHabits();
   const { theme, setThemeMode } = useTheme();
+  
+  // currentDate is used here to ensure component re-renders when date changes
+  // This causes all HabitCards to recalculate "today" when a new day starts
+  // The currentDate value itself isn't used, but accessing it ensures re-render on change
 
   // Reload habits when screen comes into focus
   useFocusEffect(
