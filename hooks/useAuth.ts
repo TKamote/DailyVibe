@@ -111,7 +111,13 @@ export function useAuth() {
       }
       // Reload user to get latest verification status
       await reload(currentUser);
-      return { success: true, verified: currentUser.emailVerified };
+      // Force auth state to update by getting fresh user
+      const freshUser = auth.currentUser;
+      // Update state manually to ensure UI reflects verification status
+      if (freshUser) {
+        setUser(freshUser);
+      }
+      return { success: true, verified: freshUser?.emailVerified || false };
     } catch (error: any) {
       return { success: false, verified: false, error: error.message };
     }

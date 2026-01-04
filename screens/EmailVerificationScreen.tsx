@@ -33,6 +33,14 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
     }
   }, [user]);
 
+  // Auto-navigate when email is verified
+  useEffect(() => {
+    if (user?.emailVerified) {
+      // Email is verified - RootNavigator will automatically show MainNavigator
+      // No need to manually navigate, just let the auth state change handle it
+    }
+  }, [user?.emailVerified]);
+
   const handleResendEmail = async () => {
     setLoading(true);
     const result = await sendVerificationEmail();
@@ -52,12 +60,20 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
     setChecking(false);
 
     if (result.success && result.verified) {
+      // Give auth state a moment to update
+      setTimeout(() => {
+        // Check again to ensure state is updated
+        checkEmailVerification().then(() => {
+          // Navigation will happen automatically via RootNavigator
+          // The useEffect above will also help trigger navigation
+        });
+      }, 300);
+      
       Alert.alert('Success', 'Your email has been verified! You can now use the app.', [
         {
           text: 'OK',
           onPress: () => {
             // Navigation will happen automatically via auth state change
-            // But we can also manually navigate if needed
           },
         },
       ]);
