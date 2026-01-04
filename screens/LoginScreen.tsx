@@ -47,9 +47,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     setLoading(false);
 
     if (result.success) {
-      // Navigation will happen automatically via auth state change
+      if (isSignUp) {
+        // After sign up, navigate to email verification screen
+        navigation.navigate('EmailVerification', { email: email.trim() });
+      } else {
+        // Navigation will happen automatically via auth state change
+      }
     } else {
-      Alert.alert('Error', result.error || 'Authentication failed');
+      // Handle email verification error
+      if (result.error === 'EMAIL_NOT_VERIFIED') {
+        // Navigate to email verification screen instead of showing alert
+        navigation.navigate('EmailVerification', { email: email.trim() });
+      } else {
+        Alert.alert('Error', result.error || 'Authentication failed');
+      }
     }
   };
 
@@ -128,6 +139,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {!isSignUp && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={styles.forgotPasswordButton}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.forgotPasswordText, { color: theme.colors.primary }]}>
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={[styles.button, { backgroundColor: theme.colors.primary }]}
@@ -246,6 +269,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  forgotPasswordButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   switchButton: {
     marginTop: 24,

@@ -9,6 +9,8 @@ import { Alert, Text } from 'react-native';
 import { ThemeProvider, useTheme } from './lib/theme';
 import { useAuth } from './hooks/useAuth';
 import { LoginScreen } from './screens/LoginScreen';
+import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
+import { EmailVerificationScreen } from './screens/EmailVerificationScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { GuideScreen } from './screens/GuideScreen';
 import { StatsScreen } from './screens/StatsScreen';
@@ -18,9 +20,11 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { PrivacyPolicyScreen } from './screens/PrivacyPolicyScreen';
 import { BrandedSplashScreen } from './screens/SplashScreen';
 
-// Auth Stack (Login)
+// Auth Stack (Login, Forgot Password, Email Verification)
 export type AuthStackParamList = {
   Login: undefined;
+  ForgotPassword: undefined;
+  EmailVerification: { email?: string };
 };
 
 // Main App Stack (Modals)
@@ -147,25 +151,32 @@ function MainNavigator() {
   );
 }
 
-// Auth Navigator (Login)
+// Auth Navigator (Login, Forgot Password, Email Verification)
 function AuthNavigator() {
   const { theme } = useTheme();
+  const { user, isEmailVerified } = useAuth();
+
+  // Determine initial route: if user exists but not verified, show EmailVerification
+  const initialRouteName = user && !isEmailVerified ? 'EmailVerification' : 'Login';
 
   return (
     <AuthStack.Navigator
+      initialRouteName={initialRouteName}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen name="EmailVerification" component={EmailVerificationScreen} />
     </AuthStack.Navigator>
   );
 }
 
 // Root Navigator (decides between Auth and Main)
 function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isEmailVerified } = useAuth();
   const { theme } = useTheme();
   const [showSplash, setShowSplash] = React.useState(true);
 
@@ -193,10 +204,13 @@ function RootNavigator() {
     return <BrandedSplashScreen />;
   }
 
+  // Block unverified users from accessing the app
+  const canAccessApp = user && isEmailVerified;
+
   return (
     <NavigationContainer>
       <StatusBar style={theme.mode === 'dark' || (theme.mode === 'auto' && theme.colors.background === '#111827') ? 'light' : 'dark'} />
-      {user ? <MainNavigator /> : <AuthNavigator />}
+      {canAccessApp ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
