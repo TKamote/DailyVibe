@@ -45,6 +45,12 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
     if (result.success) {
       setEmailSent(true);
     } else {
+      // Handle rate limiting errors
+      if (result.error === 'RATE_LIMIT_EXCEEDED' || result.error === 'RATE_LIMIT_EXCEED') {
+        Alert.alert('Too Many Requests', result.message || 'You\'ve reached the limit of 3 password reset requests per 24 hours. Please wait before requesting another.');
+        return;
+      }
+      
       // Don't reveal if email exists for security
       const errorMessage = result.error?.includes('user-not-found')
         ? 'If an account with this email exists, a password reset link has been sent.'
@@ -74,7 +80,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
                 <Text style={{ fontWeight: '600' }}>{email}</Text>
               </Text>
               <Text style={[styles.instructions, { color: theme.colors.textSecondary }]}>
-                Click the link in the email to reset your password. The link will expire in 1 hour.
+                Click the link in the email to reset your password. You can open this link on any device - your phone, computer, or tablet. The link will expire in 1 hour.
               </Text>
               <TouchableOpacity
                 style={[styles.button, { backgroundColor: theme.colors.primary }]}

@@ -19,7 +19,9 @@ DerivedData
 *.ipa
 *.xcuserstate
 project.xcworkspace
-
+   *''
+   *.bak
+   *~
 # Android/IntelliJ
 build/
 .idea

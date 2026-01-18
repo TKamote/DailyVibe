@@ -25,7 +25,7 @@ export const GuideScreen: React.FC<GuideScreenProps> = ({ navigation }) => {
         'Create an account with your email address',
         'Verify your email by clicking the link sent to your inbox (required to activate your account)',
         'Sign in to sync your habits across devices',
-        'Tap the + button in the bottom right to add your first habit',
+        'Tap the + button in the center bottom to add your first habit',
         'Choose a name and color for your habit',
         'Tap the checkbox on a habit card to mark it complete each day',
         'Watch your streak grow as you build consistency!',
@@ -37,7 +37,7 @@ export const GuideScreen: React.FC<GuideScreenProps> = ({ navigation }) => {
         '🏠 Home: View and manage all your habits',
         '📖 Guide: Access this guide and privacy policy',
         '📊 Stats: See your overall progress and insights',
-        '🚪 Sign Out: Tap to sign out (with confirmation)',
+        '⚙️ Settings: Tap to sign out or delete your account',
         '🌓/🌙 Theme: Tap the icon in the header to toggle light/dark mode',
       ],
     },
@@ -147,12 +147,12 @@ export const GuideScreen: React.FC<GuideScreenProps> = ({ navigation }) => {
       >
         <View style={styles.privacyHeader}>
           <Text style={[styles.privacyIcon, { color: theme.colors.primary }]}>ℹ️</Text>
-          <Text style={[styles.privacyTitle, { color: theme.colors.text }]}>
+          <Text style={[styles.privacyTitle, { color: theme.colors.primary }]}>
             Privacy Policy
           </Text>
         </View>
         <Text style={[styles.privacySubtext, { color: theme.colors.textSecondary }]}>
-          Learn how we protect your data and privacy
+          Learn how we protect your data and privacy • Tap to view
         </Text>
       </TouchableOpacity>
       </ScrollView>
@@ -260,6 +260,7 @@ const styles = StyleSheet.create({
   privacyTitle: {
     fontSize: 20,
     fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   privacySubtext: {
     fontSize: 14,

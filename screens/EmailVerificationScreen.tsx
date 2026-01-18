@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,11 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  AppState,
+  AppStateStatus,
+  TextInput,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../lib/theme';
 
@@ -21,11 +25,24 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
   email 
 }) => {
   const { theme } = useTheme();
-  const { sendVerificationEmail, checkEmailVerification, user } = useAuth();
+  const { sendVerificationCode, verifyEmailWithCode, checkEmailVerification, user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [code, setCode] = useState('');
   const [displayEmail, setDisplayEmail] = useState(email || user?.email || '');
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+
+  // Null user protection: redirect to Login if user becomes null (prevents sign-out loop)
+  useEffect(() => {
+    if (!user) {
+      stopPolling();
+      navigation.replace('Login');
+    }
+  }, [user, navigation]);
 
   useEffect(() => {
     if (user?.email && !displayEmail) {
@@ -33,57 +50,192 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
     }
   }, [user]);
 
-  // Auto-navigate when email is verified
-  useEffect(() => {
-    if (user?.emailVerified) {
-      // Email is verified - RootNavigator will automatically show MainNavigator
-      // No need to manually navigate, just let the auth state change handle it
+  // Cleanup function to stop polling
+  const stopPolling = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [user?.emailVerified]);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
-  const handleResendEmail = async () => {
+  // Start polling for verification status
+  const startPolling = () => {
+    if (!user || user.emailVerified) {
+      // If already verified, check once and return
+      if (user?.emailVerified) {
+        checkEmailVerification();
+      }
+      return;
+    }
+
+    // Reset start time when starting new polling session
+    startTimeRef.current = Date.now();
+
+    // Stop polling after 15 minutes to prevent infinite polling
+    timeoutRef.current = setTimeout(() => {
+      stopPolling();
+    }, 15 * 60 * 1000); // 15 minutes
+
+    // Poll every 3 seconds, but only if app is active
+    // This will detect verification even if user verified on another device
+    // because checkEmailVerification() calls reload() to fetch latest status from Firebase
+    intervalRef.current = setInterval(async () => {
+      // Only poll if app is in foreground
+      if (appStateRef.current === 'active') {
+        const result = await checkEmailVerification();
+        if (result.success && result.verified) {
+          stopPolling();
+          // Navigation will happen automatically via RootNavigator
+        }
+      }
+    }, 3000);
+  };
+
+  // Listen to app state changes (background/foreground)
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      appStateRef.current = nextAppState;
+      
+      if (nextAppState === 'active') {
+        // App came to foreground - check immediately (handles verification from another device)
+        // and resume polling if needed
+        if (user && !user.emailVerified) {
+          checkEmailVerification().then((result) => {
+            if (!result.success || !result.verified) {
+              // Not verified yet, resume polling if not already polling
+              if (!intervalRef.current) {
+                startPolling();
+              }
+            }
+          });
+        }
+      } else {
+        // App went to background - stop polling to save battery
+        stopPolling();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+      stopPolling();
+    };
+  }, [user, checkEmailVerification]);
+
+  // Only poll when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      // Check immediately when screen is focused (handles verification from another device)
+      if (user) {
+        if (user.emailVerified) {
+          checkEmailVerification();
+        } else {
+          // Start polling when screen is focused
+          startPolling();
+        }
+      }
+
+      // Cleanup when screen loses focus
+      return () => {
+        stopPolling();
+      };
+    }, [user, checkEmailVerification])
+  );
+
+  const handleResendCode = async () => {
+    if (!user) {
+      navigation.replace('Login');
+      return;
+    }
+
     setLoading(true);
-    const result = await sendVerificationEmail();
+    const result = await sendVerificationCode();
     setLoading(false);
 
     if (result.success) {
       setEmailSent(true);
-      Alert.alert('Success', 'Verification email sent! Please check your inbox.');
+      setCode(''); // Clear code input
+      Alert.alert('Success', 'Verification code sent! Please check your email.');
     } else {
-      Alert.alert('Error', result.error || 'Failed to send verification email. Please try again.');
+      if (result.error === 'RATE_LIMIT_EXCEEDED') {
+        Alert.alert('Rate Limit', result.message || 'Too many requests. Please wait before trying again.');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to send verification code. Please try again.');
+      }
     }
   };
 
-  const handleCheckVerification = async () => {
-    setChecking(true);
-    const result = await checkEmailVerification();
-    setChecking(false);
+  const handleVerifyCode = async () => {
+    if (!user) {
+      navigation.replace('Login');
+      return;
+    }
 
-    if (result.success && result.verified) {
-      // Give auth state a moment to update
-      setTimeout(() => {
-        // Check again to ensure state is updated
-        checkEmailVerification().then(() => {
-          // Navigation will happen automatically via RootNavigator
-          // The useEffect above will also help trigger navigation
-        });
-      }, 300);
+    // Validate code format (6 digits)
+    const codeDigits = code.replace(/\D/g, ''); // Remove non-digits
+    if (codeDigits.length !== 6) {
+      Alert.alert('Invalid Code', 'Please enter a 6-digit verification code.');
+      return;
+    }
+
+    setVerifying(true);
+    const result = await verifyEmailWithCode(codeDigits);
+    setVerifying(false);
+
+    if (result.success) {
+      // Check verification status immediately
+      await checkEmailVerification();
       
-      Alert.alert('Success', 'Your email has been verified! You can now use the app.', [
+      // Show success message briefly, then navigation will happen automatically
+      Alert.alert('Success', 'Your email has been verified! Redirecting to the app...', [
         {
           text: 'OK',
           onPress: () => {
-            // Navigation will happen automatically via auth state change
+            // Navigation will happen automatically via RootNavigator
+            // The polling in RootNavigator will detect the verification status change
           },
         },
       ]);
     } else {
-      Alert.alert(
-        'Not Verified Yet',
-        'Your email has not been verified yet. Please check your inbox and click the verification link.'
-      );
+      Alert.alert('Verification Failed', result.error || 'Invalid verification code. Please try again.');
     }
   };
+
+  const handleSignOut = async () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out? You can sign in again after verifying your email.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            stopPolling();
+            const result = await logout();
+            if (result.success) {
+              navigation.replace('Login');
+            } else {
+              Alert.alert('Error', result.error || 'Failed to sign out');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Show loading state if user is null (will redirect via useEffect)
+  if (!user) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -112,38 +264,70 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
 
         <View style={styles.instructionsContainer}>
           <Text style={[styles.instructions, { color: theme.colors.textSecondary }]}>
-            Please check your email and click the verification link to activate your account.
-          </Text>
-          <Text style={[styles.instructions, { color: theme.colors.textSecondary, marginTop: 12 }]}>
-            Once verified, you'll be able to use all features of DailyVibe.
+            We've sent a 6-digit verification code to your email. Please enter it below to verify your account.
           </Text>
         </View>
 
         {emailSent && (
           <View style={[styles.successBanner, { backgroundColor: theme.colors.primary + '20' }]}>
             <Text style={[styles.successText, { color: theme.colors.primary }]}>
-              ✓ Verification email sent!
+              ✓ Verification code sent!
             </Text>
           </View>
         )}
 
+        <View style={styles.codeInputContainer}>
+          <TextInput
+            style={[
+              styles.codeInput,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                color: theme.colors.text,
+              },
+            ]}
+            value={code}
+            onChangeText={(text) => {
+              // Only allow digits, max 6 characters
+              const digits = text.replace(/\D/g, '').slice(0, 6);
+              setCode(digits);
+            }}
+            placeholder="000000"
+            placeholderTextColor={theme.colors.textSecondary}
+            keyboardType="number-pad"
+            maxLength={6}
+            autoFocus={true}
+            textAlign="center"
+            selectTextOnFocus
+          />
+          <Text style={[styles.codeHint, { color: theme.colors.textSecondary }]}>
+            Enter the 6-digit code from your email
+          </Text>
+        </View>
+
         <View style={styles.actions}>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.primary }]}
-            onPress={handleCheckVerification}
-            disabled={checking}
+            style={[
+              styles.button,
+              {
+                backgroundColor: theme.colors.primary,
+                opacity: code.length === 6 ? 1 : 0.5,
+              },
+            ]}
+            onPress={handleVerifyCode}
+            disabled={verifying || code.length !== 6}
             activeOpacity={0.7}
           >
-            {checking ? (
+            {verifying ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>I've Verified My Email</Text>
+              <Text style={styles.buttonText}>Verify Code</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.secondaryButton, { borderColor: theme.colors.border }]}
-            onPress={handleResendEmail}
+            onPress={handleResendCode}
             disabled={loading}
             activeOpacity={0.7}
           >
@@ -151,7 +335,7 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
               <ActivityIndicator color={theme.colors.primary} />
             ) : (
               <Text style={[styles.secondaryButtonText, { color: theme.colors.primary }]}>
-                Resend Verification Email
+                Resend Code
               </Text>
             )}
           </TouchableOpacity>
@@ -159,8 +343,32 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
-            Didn't receive the email? Check your spam folder or try resending.
+            Didn't receive the code? Check your spam folder or try resending.
           </Text>
+        </View>
+
+        <View style={styles.footerActions}>
+          {user ? (
+            <TouchableOpacity
+              style={[styles.signOutButton, { borderColor: theme.colors.error }]}
+              onPress={handleSignOut}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.signOutButtonText, { color: theme.colors.error }]}>
+                Sign Out
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.backButton, { borderColor: theme.colors.border }]}
+              onPress={() => navigation.replace('Login')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.backButtonText, { color: theme.colors.textSecondary }]}>
+                Back to Login
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -215,6 +423,23 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
+  codeInputContainer: {
+    marginBottom: 24,
+  },
+  codeInput: {
+    height: 64,
+    borderRadius: 12,
+    borderWidth: 2,
+    fontSize: 32,
+    fontWeight: 'bold',
+    letterSpacing: 8,
+    marginBottom: 8,
+  },
+  codeHint: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
+  },
   successBanner: {
     padding: 12,
     borderRadius: 8,
@@ -259,6 +484,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  footerActions: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  backButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignSelf: 'center',
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  signOutButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignSelf: 'center',
+  },
+  signOutButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 

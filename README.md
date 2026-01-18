@@ -1,123 +1,99 @@
-# DailyVibe - AI-Powered Habit Tracker
+# DailyVibe - Habit Tracker App
 
-**Simple, Smart, Social**
+**Build better habits, one day at a time.**
 
-A minimalist habit tracking app with AI personalization, built with Expo/React Native.
+DailyVibe is a simple and intuitive habit tracking app that helps you build consistency through daily check-ins, streak tracking, and progress visualization.
 
-## 🎯 Vision
+## 📱 Download
 
-Create the simplest, most intelligent habit tracker that helps people build better habits through AI-powered insights and optional social accountability.
+- **iOS**: Available on the App Store
+- **Android**: Available on Google Play Store
 
-## 📋 Project Status
+## ✨ Features
 
-- [x] Planning & Strategy
-- [x] Project Setup
-- [x] MVP Development (Phase 1 Complete!)
-- [x] Firebase Authentication
-- [x] Firestore Multi-Device Sync
-- [x] iOS & Android Builds
-- [ ] Reminders & Notifications
-- [ ] AI Integration (Phase 2)
-- [ ] Social Features (Phase 3)
+- ✅ **Daily Habit Tracking** - Mark habits as complete each day
+- ✅ **Streak Tracking** - See your current and longest streaks
+- ✅ **Calendar View** - Visualize your 30-day completion history
+- ✅ **Multi-Device Sync** - Your habits sync across all your devices
+- ✅ **Dark/Light Mode** - Choose your preferred theme
+- ✅ **Statistics** - Track your overall progress and insights
+- ✅ **Offline Support** - Works offline, syncs when connected
 
-## 🚀 Quick Start
+## 🆘 Support & Help
 
-```bash
-# Install dependencies
-npm install
+### Getting Started
 
-# Start development server
-npm start
+1. **Create an account** with your email address
+2. **Verify your email** by clicking the link sent to your inbox
+3. **Add your first habit** by tapping the "+" button at the bottom center
+4. **Check off habits daily** to build your streak
 
-# Run on iOS
-npm run ios
+### Frequently Asked Questions
 
-# Run on Android
-npm run android
-```
+**Q: How do I add a new habit?**  
+A: Tap the "+" button at the bottom center of the Home screen, enter a name, choose a color, and save.
 
-## 📁 Project Structure
+**Q: How do streaks work?**  
+A: Complete your habit every day to build a streak. Missing a day resets your current streak, but your longest streak is always saved.
 
-```
-DailyVibe/
-├── App.tsx                 # Main app component
-├── components/             # Reusable UI components
-│   ├── HabitCard.tsx
-│   ├── StreakDisplay.tsx
-│   └── CalendarView.tsx
-├── screens/                # App screens
-│   ├── LoginScreen.tsx
-│   ├── HomeScreen.tsx
-│   ├── AddHabitScreen.tsx
-│   ├── EditHabitScreen.tsx
-│   ├── StatsScreen.tsx
-│   ├── GuideScreen.tsx
-│   ├── SettingsScreen.tsx
-│   ├── PrivacyPolicyScreen.tsx
-│   └── SplashScreen.tsx
-├── hooks/                  # Custom React hooks
-│   ├── useHabits.ts
-│   └── useAuth.ts
-├── lib/                    # Utilities & services
-│   ├── firebase.ts         # Firebase configuration
-│   ├── firestore.ts        # Firestore operations
-│   ├── storage.ts          # Local storage (migration)
-│   ├── utils.ts
-│   ├── theme.tsx
-│   └── privacyPolicy.ts
-├── types/                  # TypeScript types
-└── docs/                   # Documentation
-    ├── SETUP.md
-    ├── PRIVACY_POLICY.md
-    └── RESEARCH.md
-```
+**Q: Can I use the app offline?**  
+A: Yes! The app works offline and will sync your data when you're connected to the internet.
 
-## 🛠️ Tech Stack
+**Q: How do I delete a habit?**  
+A: Swipe left on a habit card to reveal delete option, or tap the habit to view details and delete from there.
 
-- **Frontend**: Expo/React Native (SDK 53)
-- **Navigation**: React Navigation v6
-- **Backend**: Firebase (Auth, Firestore)
-- **Storage**: Firestore (cloud sync) + AsyncStorage (local cache)
-- **Styling**: React Native StyleSheet
-- **State Management**: React Hooks
-- **Build**: EAS Build
-- **Future**: Google Gemini API, RevenueCat
+**Q: How do I sign out or delete my account?**  
+A: Go to the Settings tab (⚙️ icon) and tap to sign out or delete your account.
 
-## ✨ Features (Current)
+**Q: My habits aren't syncing across devices**  
+A: Make sure you're signed in with the same email on all devices and that your email is verified.
 
-- ✅ User Authentication (Email/Password)
-- ✅ Add, Edit, Delete habits
-- ✅ Daily habit check-off
-- ✅ Streak tracking (current & longest)
-- ✅ Calendar view (30-day history)
-- ✅ Statistics & analytics
-- ✅ Dark/Light mode (default: dark)
-- ✅ Swipe-to-delete gestures
-- ✅ Multi-device sync (Firestore)
-- ✅ Offline support
-- ✅ Placeholder habit for new users
-- ✅ User guide & privacy policy
+### Troubleshooting
 
-## 📖 Documentation
+**Email verification not working?**
+- Check your spam folder
+- Make sure you clicked the verification link
+- Try resending the verification email from the app
+- Verify on any device - the app will detect it automatically
 
-- [Setup Guide](./docs/SETUP.md) - Firebase Authentication & Firestore setup
-- [Privacy Policy](./docs/PRIVACY_POLICY.md) - Privacy policy and data handling
-- [Feature Research](./docs/RESEARCH.md) - Feature research & AI opportunities
+**Habits not resetting daily?**
+- The app automatically resets at midnight based on your location
+- If habits aren't resetting, try closing and reopening the app
+- Make sure your device date/time is set correctly
 
-## 🏗️ Building
+**App crashes or freezes?**
+- Try closing and reopening the app
+- Make sure you have the latest version installed
+- Restart your device if issues persist
 
-```bash
-# Start development server
-npx expo start --dev-client
+## 📧 Contact & Feedback
 
-# Build for iOS (production)
-npx eas build --profile production --platform ios
+For support, bug reports, or feature requests, please visit:
+- **Portfolio**: [https://www.tkamot.com/creator](https://www.tkamot.com/creator)
+- **GitHub Issues**: [Report an issue](https://github.com/TKamote/DailyVibe/issues)
 
-# Build for Android (production)
-npx eas build --profile production --platform android
-```
+## 🔒 Privacy
+
+Your data is encrypted and stored securely. We respect your privacy and never share your personal information. View our full [Privacy Policy](https://github.com/TKamote/DailyVibe/blob/main/docs/PRIVACY_POLICY.md) for details.
+
+## 📄 Terms
+
+By using DailyVibe, you agree to use the app responsibly. We are not liable for any data loss or issues arising from app usage.
 
 ---
 
-**Built with ❤️ for people who want to build better habits, simply.**
+## 🛠️ For Developers
 
+This is the source code repository for DailyVibe. If you're a developer interested in contributing or learning more about the technical implementation, see the [Setup Guide](./docs/SETUP.md).
+
+### Tech Stack
+- **Frontend**: Expo/React Native (SDK 53)
+- **Backend**: Firebase (Auth, Firestore)
+- **Build**: EAS Build
+
+---
+
+**Version**: 1.0.6  
+**Last Updated**: 2026
+
+Built with ❤️ for people who want to build better habits, simply.

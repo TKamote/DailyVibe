@@ -273,6 +273,8 @@ const styles = StyleSheet.create({
   forgotPasswordButton: {
     alignSelf: 'flex-end',
     marginBottom: 8,
+    minHeight: 20, // Ensure button has minimum height on Android
+    paddingVertical: 4, // Add padding for better touch target
   },
   forgotPasswordText: {
     fontSize: 14,
@@ -283,7 +285,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   switchText: {
-    fontSize: 14,
+    fontSize: 16,
+    textDecorationLine: 'underline',
   },
 });
 

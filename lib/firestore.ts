@@ -1,7 +1,8 @@
 import { 
   collection, 
   doc, 
-  getDocs, 
+  getDocs,
+  getDoc,
   setDoc, 
   deleteDoc, 
   onSnapshot,
@@ -136,3 +137,36 @@ export async function deleteAllUserHabits(userId: string): Promise<void> {
   }
 }
 
+/**
+ * Mark user's email as verified in Firestore (used for code-based verification)
+ */
+export async function markEmailAsVerifiedInFirestore(userId: string): Promise<void> {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, {
+      emailVerified: true,
+      emailVerifiedAt: Timestamp.now(),
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error marking email as verified in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if user's email is verified in Firestore
+ */
+export async function isEmailVerifiedInFirestore(userId: string): Promise<boolean> {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+    if (!userDoc.exists()) {
+      return false;
+    }
+    const data = userDoc.data();
+    return data.emailVerified === true;
+  } catch (error) {
+    console.error('Error checking email verification in Firestore:', error);
+    return false;
+  }
+}
