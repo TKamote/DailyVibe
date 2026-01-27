@@ -13,8 +13,8 @@
 // Resend API key
 const RESEND_API_KEY = 're_e3EqD8NA_EMmspbc5cNxnkesNe197veYT';
 const RESEND_API_URL = 'https://api.resend.com/emails';
-// Use Resend's default domain for testing, or replace with your verified domain
-const FROM_EMAIL = 'DailyVibe <onboarding@resend.dev>';
+// Use verified custom domain for production
+const FROM_EMAIL = 'DailyVibe <noreply@dailyvibe.fun>';
 
 interface SendEmailOptions {
   to: string;
@@ -73,6 +73,7 @@ export async function sendVerificationCodeEmail(
   email: string,
   code: string
 ): Promise<{ success: boolean; error?: string }> {
+  console.log('[sendVerificationCodeEmail] Sending verification code to:', email);
   const subject = 'Verify your DailyVibe account';
   const html = `
     <!DOCTYPE html>

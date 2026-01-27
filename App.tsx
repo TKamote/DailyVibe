@@ -5,10 +5,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
-import { Alert, Text } from 'react-native';
+import { Text } from 'react-native';
 import { ThemeProvider, useTheme } from './lib/theme';
+import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
-import { parseDeepLink, getInitialURL, subscribeToDeepLinks } from './lib/deepLinking';
 import { LoginScreen } from './screens/LoginScreen';
 import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
 import { EmailVerificationScreen } from './screens/EmailVerificationScreen';
@@ -158,13 +158,10 @@ function AuthNavigator() {
   const { user, isEmailVerified } = useAuth();
 
   // Determine initial route: if user exists but not verified, show EmailVerification
-  // Use key prop to force remount when user state changes (fixes sign-out loop)
   const initialRouteName = user && !isEmailVerified ? 'EmailVerification' : 'Login';
-  const navigatorKey = user ? `auth-${user.uid}` : 'auth-no-user';
 
   return (
     <AuthStack.Navigator
-      key={navigatorKey}
       initialRouteName={initialRouteName}
       screenOptions={{
         headerShown: false,
@@ -180,83 +177,10 @@ function AuthNavigator() {
 
 // Root Navigator (decides between Auth and Main)
 function RootNavigator() {
-  const { user, loading, isEmailVerified, verifyEmailWithCode, checkEmailVerification } = useAuth();
+  const { user, loading, isEmailVerified } = useAuth();
   const { theme } = useTheme();
   const [showSplash, setShowSplash] = React.useState(true);
-  const navigationRef = React.useRef<any>(null);
   
-  // Re-check verification status periodically when user is logged in but not verified
-  React.useEffect(() => {
-    if (!user || isEmailVerified || loading) return;
-    
-    // Check verification status every 2 seconds if user is not verified
-    const interval = setInterval(async () => {
-      const result = await checkEmailVerification();
-      if (result.success && result.verified) {
-        // Verification status updated, component will re-render
-        clearInterval(interval);
-      }
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [user, isEmailVerified, loading, checkEmailVerification]);
-
-  // Handle deep links for email verification and password reset
-  React.useEffect(() => {
-    if (loading) return;
-
-    const handleDeepLink = async (url: string) => {
-      const parsed = parseDeepLink(url);
-      if (!parsed) return;
-
-      if (parsed.mode === 'verifyEmail') {
-        // Handle email verification
-        const result = await verifyEmailWithCode(parsed.oobCode);
-        if (result.success) {
-          Alert.alert(
-            'Email Verified',
-            'Your email has been verified successfully!',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  // Navigation will happen automatically via auth state change
-                },
-              },
-            ]
-          );
-        } else {
-          Alert.alert(
-            'Verification Failed',
-            result.error || 'This verification link is invalid or has expired. Please request a new verification email.',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  // Navigation will happen automatically via auth state
-                },
-              },
-            ]
-          );
-        }
-      }
-    };
-
-    // Check for initial deep link (app opened via link)
-    getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
-      }
-    });
-
-    // Subscribe to deep link events (app already open, link clicked)
-    const unsubscribe = subscribeToDeepLinks((url) => {
-      handleDeepLink(url);
-    });
-
-    return unsubscribe;
-  }, [loading, verifyEmailWithCode, user]);
-
   React.useEffect(() => {
     // Show splash screen for at least 3 seconds
     const timer = setTimeout(() => {
@@ -274,7 +198,7 @@ function RootNavigator() {
   const canAccessApp = user && isEmailVerified;
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer>
       <StatusBar style={theme.mode === 'dark' || (theme.mode === 'auto' && theme.colors.background === '#111827') ? 'light' : 'dark'} />
       {canAccessApp ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
@@ -283,10 +207,12 @@ function RootNavigator() {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <RootNavigator />
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <RootNavigator />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </AuthProvider>
   );
 }

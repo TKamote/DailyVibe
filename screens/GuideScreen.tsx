@@ -23,7 +23,7 @@ export const GuideScreen: React.FC<GuideScreenProps> = ({ navigation }) => {
       title: 'Getting Started',
       content: [
         'Create an account with your email address',
-        'Verify your email by clicking the link sent to your inbox (required to activate your account)',
+        'Verify your email by entering the 6-digit code sent to your inbox (required to activate your account)',
         'Sign in to sync your habits across devices',
         'Tap the + button in the center bottom to add your first habit',
         'Choose a name and color for your habit',

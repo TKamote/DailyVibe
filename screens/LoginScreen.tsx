@@ -54,12 +54,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         // Navigation will happen automatically via auth state change
       }
     } else {
-      // Handle email verification error
+      // Handle special cases
       if (result.error === 'EMAIL_NOT_VERIFIED') {
         // Navigate to email verification screen instead of showing alert
         navigation.navigate('EmailVerification', { email: email.trim() });
+      } else if (result.error === 'VERIFICATION_CODE_SEND_FAILED' && (result as any).userCreated) {
+        // Account was created but code sending failed
+        // Still navigate to verification screen so user can resend
+        Alert.alert(
+          'Account Created',
+          result.message || 'Your account was created, but we couldn\'t send the verification code. Please use the "Resend Code" button on the next screen.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.navigate('EmailVerification', { email: email.trim() });
+              }
+            }
+          ]
+        );
       } else {
-        Alert.alert('Error', result.error || 'Authentication failed');
+        Alert.alert('Error', result.message || result.error || 'Authentication failed');
       }
     }
   };

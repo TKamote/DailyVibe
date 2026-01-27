@@ -1,7 +1,7 @@
 import { 
   collection, 
   doc, 
-  getDocs,
+  getDocs, 
   getDoc,
   setDoc, 
   deleteDoc, 
@@ -168,5 +168,20 @@ export async function isEmailVerifiedInFirestore(userId: string): Promise<boolea
   } catch (error) {
     console.error('Error checking email verification in Firestore:', error);
     return false;
+  }
+}
+
+/**
+ * Clear email verification status in Firestore (used when deleting account)
+ */
+export async function clearEmailVerificationInFirestore(userId: string): Promise<void> {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, {
+      emailVerified: false,
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error clearing email verification in Firestore:', error);
+    // Don't throw - this is cleanup, not critical
   }
 }

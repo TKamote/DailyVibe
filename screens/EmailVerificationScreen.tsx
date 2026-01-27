@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  AppState,
-  AppStateStatus,
   TextInput,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../lib/theme';
 
@@ -31,15 +28,10 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
   const [emailSent, setEmailSent] = useState(false);
   const [code, setCode] = useState('');
   const [displayEmail, setDisplayEmail] = useState(email || user?.email || '');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
-  // Null user protection: redirect to Login if user becomes null (prevents sign-out loop)
+  // Null user protection: redirect to Login if user becomes null
   useEffect(() => {
     if (!user) {
-      stopPolling();
       navigation.replace('Login');
     }
   }, [user, navigation]);
@@ -49,102 +41,6 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
       setDisplayEmail(user.email);
     }
   }, [user]);
-
-  // Cleanup function to stop polling
-  const stopPolling = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  };
-
-  // Start polling for verification status
-  const startPolling = () => {
-    if (!user || user.emailVerified) {
-      // If already verified, check once and return
-      if (user?.emailVerified) {
-        checkEmailVerification();
-      }
-      return;
-    }
-
-    // Reset start time when starting new polling session
-    startTimeRef.current = Date.now();
-
-    // Stop polling after 15 minutes to prevent infinite polling
-    timeoutRef.current = setTimeout(() => {
-      stopPolling();
-    }, 15 * 60 * 1000); // 15 minutes
-
-    // Poll every 3 seconds, but only if app is active
-    // This will detect verification even if user verified on another device
-    // because checkEmailVerification() calls reload() to fetch latest status from Firebase
-    intervalRef.current = setInterval(async () => {
-      // Only poll if app is in foreground
-      if (appStateRef.current === 'active') {
-        const result = await checkEmailVerification();
-        if (result.success && result.verified) {
-          stopPolling();
-          // Navigation will happen automatically via RootNavigator
-        }
-      }
-    }, 3000);
-  };
-
-  // Listen to app state changes (background/foreground)
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      appStateRef.current = nextAppState;
-      
-      if (nextAppState === 'active') {
-        // App came to foreground - check immediately (handles verification from another device)
-        // and resume polling if needed
-        if (user && !user.emailVerified) {
-          checkEmailVerification().then((result) => {
-            if (!result.success || !result.verified) {
-              // Not verified yet, resume polling if not already polling
-              if (!intervalRef.current) {
-                startPolling();
-              }
-            }
-          });
-        }
-      } else {
-        // App went to background - stop polling to save battery
-        stopPolling();
-      }
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => {
-      subscription.remove();
-      stopPolling();
-    };
-  }, [user, checkEmailVerification]);
-
-  // Only poll when screen is focused
-  useFocusEffect(
-    React.useCallback(() => {
-      // Check immediately when screen is focused (handles verification from another device)
-      if (user) {
-        if (user.emailVerified) {
-          checkEmailVerification();
-        } else {
-          // Start polling when screen is focused
-          startPolling();
-        }
-      }
-
-      // Cleanup when screen loses focus
-      return () => {
-        stopPolling();
-      };
-    }, [user, checkEmailVerification])
-  );
 
   const handleResendCode = async () => {
     if (!user) {
@@ -187,19 +83,11 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
     setVerifying(false);
 
     if (result.success) {
-      // Check verification status immediately
-      await checkEmailVerification();
+      // Success! The AuthContext will update isEmailVerified to true,
+      // causing RootNavigator to automatically switch to the Main App.
+      // We don't need to manually navigate.
       
-      // Show success message briefly, then navigation will happen automatically
-      Alert.alert('Success', 'Your email has been verified! Redirecting to the app...', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Navigation will happen automatically via RootNavigator
-            // The polling in RootNavigator will detect the verification status change
-          },
-        },
-      ]);
+      // Optional: Show a brief success toast or just let the transition happen
     } else {
       Alert.alert('Verification Failed', result.error || 'Invalid verification code. Please try again.');
     }
@@ -215,7 +103,6 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
           text: 'Sign Out',
           style: 'destructive',
           onPress: async () => {
-            stopPolling();
             const result = await logout();
             if (result.success) {
               navigation.replace('Login');
@@ -234,8 +121,8 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
       <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
-    );
-  }
+      );
+    }
 
   return (
     <ScrollView
@@ -512,4 +399,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
