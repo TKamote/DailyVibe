@@ -2,7 +2,7 @@
   "expo": {
     "name": "DailyVibe",
     "slug": "dailyvibe",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "dailyvibe",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.davidonquit.dailyvibe",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -27,7 +27,7 @@
     },
     "android": {
       "package": "com.davidonquit.dailyvibe",
-      "versionCode": 14,
+      "versionCode": 15,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
