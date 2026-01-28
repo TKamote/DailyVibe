@@ -1,6 +1,6 @@
 DailyVibe Privacy Policy
 
-Last Updated: January 4, 2026
+Last Updated: January 28, 2026
 
 Introduction
 
@@ -63,7 +63,7 @@ You have full control over your data:
 - Delete Habits: You can delete individual habits at any time
 - Sign Out: You can sign out at any time using the Settings tab
 - Account Deletion: You can permanently delete your account and all data directly in the app (Settings tab → Delete Account). This action cannot be undone.
-- Alternative: You can also request account deletion by emailing us at david@pdfreportmaker.com
+- Alternative: You can also request account deletion by emailing us at admin@dailyvibe.fun
 
 All account deletion requests are processed immediately and permanently remove all your data from our servers.
 
@@ -83,4 +83,4 @@ Contact Us
 
 If you have questions about this Privacy Policy, please contact us at:
 
-Email: david@pdfreportmaker.com
+Email: admin@dailyvibe.fun

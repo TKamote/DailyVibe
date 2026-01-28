@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../lib/theme';
+import { getFriendlyErrorMessage } from '../lib/errorHandling';
 
 interface ForgotPasswordScreenProps {
   navigation: any;
@@ -54,8 +55,8 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
       // Don't reveal if email exists for security
       const errorMessage = result.error?.includes('user-not-found')
         ? 'If an account with this email exists, a password reset link has been sent.'
-        : result.error || 'Failed to send reset email. Please try again.';
-      Alert.alert('Error', errorMessage);
+        : getFriendlyErrorMessage({ code: result.error, message: result.message });
+      Alert.alert('Reset Failed', errorMessage);
     }
   };
 

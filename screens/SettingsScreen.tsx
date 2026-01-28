@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Alert, Text, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../hooks/useAuth';
+import { getFriendlyErrorMessage } from '../lib/errorHandling';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -32,7 +33,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
           onPress: async () => {
             const result = await logout();
             if (!result.success) {
-              Alert.alert('Error', result.error || 'Failed to sign out');
+              Alert.alert('Sign Out Failed', getFriendlyErrorMessage({ code: result.error }));
             }
             // Navigation will happen automatically via auth state change
           },
@@ -66,7 +67,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
                       Alert.alert('Account Deleted', 'Your account and all data have been permanently deleted.');
                       // Navigation will happen automatically via auth state change
                     } else {
-                      Alert.alert('Error', result.error || 'Failed to delete account');
+                      // Check specifically for requires-recent-login to show a helpful title
+                      const isSecurityCheck = result.error === 'auth/requires-recent-login';
+                      const title = isSecurityCheck ? 'Security Check Required' : 'Delete Failed';
+                      
+                      Alert.alert(title, getFriendlyErrorMessage({ code: result.error }));
                     }
                   },
                 },

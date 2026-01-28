@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../lib/theme';
+import { getFriendlyErrorMessage } from '../lib/errorHandling';
 
 interface LoginScreenProps {
   navigation: any;
@@ -74,7 +75,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           ]
         );
       } else {
-        Alert.alert('Error', result.message || result.error || 'Authentication failed');
+        // Use friendly error message helper
+        Alert.alert('Login Failed', getFriendlyErrorMessage({ code: result.error, message: result.message }));
       }
     }
   };

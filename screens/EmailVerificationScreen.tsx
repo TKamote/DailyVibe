@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../lib/theme';
+import { getFriendlyErrorMessage } from '../lib/errorHandling';
 
 interface EmailVerificationScreenProps {
   navigation: any;
@@ -60,7 +61,7 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
       if (result.error === 'RATE_LIMIT_EXCEEDED') {
         Alert.alert('Rate Limit', result.message || 'Too many requests. Please wait before trying again.');
       } else {
-        Alert.alert('Error', result.error || 'Failed to send verification code. Please try again.');
+        Alert.alert('Send Failed', getFriendlyErrorMessage({ code: result.error, message: result.message }));
       }
     }
   };
@@ -89,7 +90,7 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
       
       // Optional: Show a brief success toast or just let the transition happen
     } else {
-      Alert.alert('Verification Failed', result.error || 'Invalid verification code. Please try again.');
+      Alert.alert('Verification Failed', getFriendlyErrorMessage({ code: result.error, message: result.message }));
     }
   };
 
@@ -107,7 +108,7 @@ export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = (
             if (result.success) {
               navigation.replace('Login');
             } else {
-              Alert.alert('Error', result.error || 'Failed to sign out');
+              Alert.alert('Sign Out Failed', getFriendlyErrorMessage({ code: result.error }));
             }
           },
         },
