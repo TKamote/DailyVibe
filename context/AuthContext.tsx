@@ -166,6 +166,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
 
+      // MAGIC DOMAIN LOGIC: Skip sending for test accounts
+      if (targetEmail.endsWith('@test.dailyvibe.fun')) {
+        console.log('[MagicDomain] Skipping email send for:', targetEmail);
+        return { success: true };
+      }
+
       // Generate and store code
       const { code } = await storeVerificationCode(targetUserId, targetEmail);
 
@@ -197,10 +203,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: 'No user signed in' };
       }
 
-      // Verify the code
-      const verificationResult = await verifyCode(currentUser.uid, code);
-      if (!verificationResult.valid) {
-        return { success: false, error: verificationResult.error || 'Invalid verification code' };
+      // MAGIC DOMAIN LOGIC: Bypass check for test accounts with code 123456
+      if (currentUser.email?.endsWith('@test.dailyvibe.fun') && code === '123456') {
+        console.log('[MagicDomain] Bypassing verification check for:', currentUser.email);
+      } else {
+        // Verify the code normally
+        const verificationResult = await verifyCode(currentUser.uid, code);
+        if (!verificationResult.valid) {
+          return { success: false, error: verificationResult.error || 'Invalid verification code' };
+        }
       }
 
       // Code is valid - mark email as verified in Firestore
